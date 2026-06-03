@@ -1,0 +1,1145 @@
+<!doctype html>
+<html lang="ca">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Organitzador de Caps de Setmana</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #f3f0ea;
+      color: #202522;
+      font-family: Arial, Helvetica, sans-serif;
+      min-height: 100vh;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    }
+
+    .app {
+      margin: 0 auto;
+      max-width: 1100px;
+      min-height: 100vh;
+      padding: 18px 18px 34px;
+    }
+
+    header {
+      align-items: center;
+      display: flex;
+      gap: 14px;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .brand h1 {
+      font-size: 28px;
+      line-height: 1.1;
+      overflow-wrap: anywhere;
+    }
+
+    .brand p {
+      color: #68716b;
+      font-size: 14px;
+      font-weight: 700;
+      margin-top: 5px;
+    }
+
+    .tabs {
+      background: #ffffff;
+      border: 1px solid #ded8cd;
+      border-radius: 8px;
+      display: flex;
+      flex-shrink: 0;
+      gap: 4px;
+      padding: 4px;
+    }
+
+    .tab {
+      background: transparent;
+      border: 0;
+      border-radius: 6px;
+      color: #59625d;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 900;
+      min-height: 38px;
+      padding: 0 14px;
+      touch-action: manipulation;
+    }
+
+    .tab.active {
+      background: #203a34;
+      color: #ffffff;
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .next-event {
+      background: #203a34;
+      border-radius: 8px;
+      color: #ffffff;
+      margin-bottom: 18px;
+      min-height: 150px;
+      padding: 22px;
+      width: 100%;
+    }
+
+    .next-event .label {
+      color: #b8d7c9;
+      font-size: 13px;
+      font-weight: 900;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+
+    .next-event h2 {
+      font-size: 29px;
+      line-height: 1.15;
+      margin-bottom: 10px;
+      overflow-wrap: anywhere;
+    }
+
+    .next-event p {
+      color: #e7eee9;
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+    }
+
+    .summary-grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(3, 1fr);
+      margin-bottom: 18px;
+    }
+
+    .summary-box {
+      background: #ffffff;
+      border: 1px solid #ded8cd;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .summary-box strong {
+      display: block;
+      font-size: 24px;
+      margin-bottom: 6px;
+    }
+
+    .summary-box span {
+      color: #68716b;
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1.25;
+    }
+
+    .home-actions {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .primary-button,
+    .secondary-button {
+      border: 0;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 900;
+      min-height: 50px;
+      padding: 0 18px;
+      touch-action: manipulation;
+    }
+
+    .primary-button {
+      background: #d95f3d;
+      color: #ffffff;
+    }
+
+    .secondary-button {
+      background: #ffffff;
+      border: 1px solid #ded8cd;
+      color: #203a34;
+    }
+
+    .calendar-shell {
+      background: #ffffff;
+      border: 1px solid #ded8cd;
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .calendar-toolbar {
+      align-items: center;
+      border-bottom: 1px solid #ebe5da;
+      display: flex;
+      gap: 12px;
+      justify-content: space-between;
+      padding: 14px;
+    }
+
+    .month-title {
+      font-size: 22px;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .month-button {
+      align-items: center;
+      background: #203a34;
+      border: 0;
+      border-radius: 50%;
+      color: #ffffff;
+      cursor: pointer;
+      display: flex;
+      flex-shrink: 0;
+      font-size: 22px;
+      font-weight: 900;
+      height: 42px;
+      justify-content: center;
+      touch-action: manipulation;
+      width: 42px;
+    }
+
+    .weekday-row,
+    .month-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+    }
+
+    .weekday {
+      background: #f8f6f1;
+      border-bottom: 1px solid #ebe5da;
+      color: #68716b;
+      font-size: 12px;
+      font-weight: 900;
+      padding: 10px 6px;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .calendar-day {
+      background: #ffffff;
+      border-bottom: 1px solid #ebe5da;
+      border-right: 1px solid #ebe5da;
+      min-height: 126px;
+      padding: 9px;
+      position: relative;
+    }
+
+    .calendar-day:nth-child(7n) {
+      border-right: 0;
+    }
+
+    .calendar-day.muted {
+      background: #fbfaf7;
+      color: #aaa299;
+    }
+
+    .calendar-day.weekend {
+      background: #f2f7f3;
+    }
+
+    .calendar-day.today {
+      box-shadow: inset 0 0 0 2px #d95f3d;
+    }
+
+    .day-button {
+      background: transparent;
+      border: 0;
+      color: inherit;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      text-align: left;
+      touch-action: manipulation;
+      width: 100%;
+    }
+
+    .day-number {
+      align-items: center;
+      background: #ffffff;
+      border-radius: 50%;
+      color: #202522;
+      display: flex;
+      font-size: 14px;
+      font-weight: 900;
+      height: 28px;
+      justify-content: center;
+      width: 28px;
+    }
+
+    .calendar-day.weekend .day-number {
+      background: #203a34;
+      color: #ffffff;
+    }
+
+    .day-kind {
+      color: #68716b;
+      font-size: 11px;
+      font-weight: 800;
+      min-height: 14px;
+    }
+
+    .day-events {
+      display: grid;
+      gap: 5px;
+      margin-top: 8px;
+    }
+
+    .calendar-event {
+      background: #ffffff;
+      border: 1px solid #d9e4da;
+      border-left: 4px solid #d95f3d;
+      border-radius: 7px;
+      color: #29342f;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.25;
+      overflow: hidden;
+      padding: 6px;
+      text-overflow: ellipsis;
+    }
+
+    .event-time {
+      color: #d95f3d;
+      display: block;
+      font-size: 11px;
+      font-weight: 900;
+      margin-bottom: 2px;
+    }
+
+    .event-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .event-card {
+      background: #ffffff;
+      border: 1px solid #ded8cd;
+      border-left: 5px solid #203a34;
+      border-radius: 8px;
+      padding: 13px;
+    }
+
+    .event-top {
+      align-items: flex-start;
+      display: flex;
+      gap: 10px;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .event-title {
+      font-size: 17px;
+      font-weight: 900;
+      line-height: 1.25;
+      overflow-wrap: anywhere;
+    }
+
+    .event-date {
+      color: #d95f3d;
+      font-size: 14px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .event-detail {
+      color: #5d665f;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+    }
+
+    .empty {
+      border: 1px dashed #cfc8bc;
+      border-radius: 8px;
+      color: #777067;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 18px;
+      text-align: center;
+    }
+
+    .delete-button {
+      background: transparent;
+      border: 0;
+      color: #8a3022;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 900;
+      margin-top: 10px;
+      min-height: 34px;
+      padding: 0;
+      touch-action: manipulation;
+    }
+
+    .fab {
+      align-items: center;
+      background: #d95f3d;
+      border: 0;
+      border-radius: 50%;
+      bottom: 22px;
+      box-shadow: 0 12px 30px rgba(32, 37, 34, 0.24);
+      color: #ffffff;
+      cursor: pointer;
+      display: flex;
+      font-size: 34px;
+      font-weight: 700;
+      height: 60px;
+      justify-content: center;
+      position: fixed;
+      right: 22px;
+      touch-action: manipulation;
+      width: 60px;
+      z-index: 20;
+    }
+
+    .fab[hidden] {
+      display: none;
+    }
+
+    .modal {
+      align-items: flex-end;
+      background: rgba(20, 24, 22, 0.54);
+      display: none;
+      inset: 0;
+      justify-content: center;
+      padding: 18px;
+      position: fixed;
+      z-index: 30;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-card {
+      background: #ffffff;
+      border-radius: 8px;
+      max-width: 560px;
+      padding: 18px;
+      width: 100%;
+    }
+
+    .modal-header {
+      align-items: center;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .modal-header h2 {
+      font-size: 21px;
+    }
+
+    .close-button {
+      align-items: center;
+      background: #f1ece3;
+      border: 0;
+      border-radius: 50%;
+      color: #202522;
+      cursor: pointer;
+      display: flex;
+      font-size: 24px;
+      font-weight: 900;
+      height: 40px;
+      justify-content: center;
+      width: 40px;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    label {
+      color: #4a544f;
+      display: grid;
+      font-size: 13px;
+      font-weight: 900;
+      gap: 7px;
+    }
+
+    input {
+      background: #fbfaf7;
+      border: 1px solid #cfc8bc;
+      border-radius: 8px;
+      color: #202522;
+      font-size: 16px;
+      min-height: 48px;
+      padding: 0 12px;
+      width: 100%;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    .hint {
+      color: #777067;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.35;
+      margin-top: -3px;
+    }
+
+    @media (max-width: 760px) {
+      body {
+        background: #ffffff;
+      }
+
+      .app {
+        padding: 14px 14px 92px;
+      }
+
+      header {
+        align-items: stretch;
+        background: #ffffff;
+        border-bottom: 1px solid #ebe5da;
+        flex-direction: column;
+        gap: 12px;
+        margin: -14px -14px 16px;
+        padding: 14px;
+        position: sticky;
+        top: 0;
+      }
+
+      .brand h1 {
+        font-size: 25px;
+      }
+
+      .tabs {
+        width: 100%;
+      }
+
+      .tab {
+        flex: 1;
+        font-size: 15px;
+        min-height: 44px;
+      }
+
+      .summary-grid,
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .next-event {
+        margin-bottom: 14px;
+        min-height: 138px;
+        padding: 18px;
+      }
+
+      .next-event h2 {
+        font-size: 25px;
+      }
+
+      .summary-grid {
+        gap: 10px;
+      }
+
+      .summary-box {
+        align-items: center;
+        display: flex;
+        justify-content: space-between;
+        min-height: 64px;
+        padding: 14px;
+      }
+
+      .summary-box strong {
+        margin-bottom: 0;
+      }
+
+      .home-actions {
+        flex-direction: column;
+      }
+
+      .calendar-shell {
+        border-left: 0;
+        border-right: 0;
+        margin-left: -14px;
+        margin-right: -14px;
+      }
+
+      .calendar-toolbar {
+        padding: 12px 14px;
+      }
+
+      .month-title {
+        font-size: 19px;
+      }
+
+      .month-button {
+        height: 40px;
+        width: 40px;
+      }
+
+      .weekday {
+        font-size: 10px;
+        padding: 8px 2px;
+      }
+
+      .calendar-day {
+        min-height: 86px;
+        padding: 5px;
+      }
+
+      .day-number {
+        font-size: 12px;
+        height: 24px;
+        width: 24px;
+      }
+
+      .day-kind {
+        display: none;
+      }
+
+      .day-events {
+        gap: 3px;
+        margin-top: 5px;
+      }
+
+      .calendar-event {
+        border-left-width: 3px;
+        font-size: 10px;
+        padding: 4px;
+      }
+
+      .event-time {
+        font-size: 10px;
+      }
+
+      .event-top {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .event-date {
+        white-space: normal;
+      }
+
+      .fab {
+        bottom: 18px;
+        height: 58px;
+        right: 18px;
+        width: 58px;
+      }
+
+      .modal {
+        padding: 0;
+      }
+
+      .modal-card {
+        border-radius: 8px 8px 0 0;
+        max-height: 92vh;
+        overflow: auto;
+        padding: 18px 16px 22px;
+      }
+
+      input {
+        min-height: 50px;
+      }
+    }
+
+    @media (max-width: 390px) {
+      .brand h1 {
+        font-size: 23px;
+      }
+
+      .next-event h2 {
+        font-size: 23px;
+      }
+
+      .tab {
+        padding: 0 8px;
+      }
+
+      .calendar-day {
+        min-height: 78px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div class="brand">
+        <h1>El meu cap de setmana</h1>
+        <p>Organitza els dissabtes i diumenges</p>
+      </div>
+
+      <nav class="tabs" aria-label="Pàgines">
+        <button class="tab active" type="button" data-page="home">Inici</button>
+        <button class="tab" type="button" data-page="calendar">Calendari</button>
+      </nav>
+    </header>
+
+    <section class="page active" id="homePage">
+      <article class="next-event">
+        <div class="label">El teu pròxim esdeveniment és:</div>
+        <h2 id="nextTitle">Encara no tens esdeveniments</h2>
+        <p id="nextInfo">Afegeix una activitat al calendari per veure-la aquí.</p>
+      </article>
+
+      <section class="summary-grid" aria-label="Resum">
+        <div class="summary-box">
+          <strong id="totalEvents">0</strong>
+          <span>esdeveniments guardats</span>
+        </div>
+        <div class="summary-box">
+          <strong id="saturdayEvents">0</strong>
+          <span>plans dissabte</span>
+        </div>
+        <div class="summary-box">
+          <strong id="sundayEvents">0</strong>
+          <span>plans diumenge</span>
+        </div>
+      </section>
+
+      <div class="home-actions">
+        <button class="primary-button" type="button" id="homeAddButton">Afegir activitat</button>
+        <button class="secondary-button" type="button" id="openCalendarButton">Veure calendari</button>
+      </div>
+
+      <section class="event-list" id="upcomingList" aria-label="Pròximes activitats"></section>
+    </section>
+
+    <section class="page" id="calendarPage">
+      <section class="calendar-shell" aria-label="Calendari mensual">
+        <div class="calendar-toolbar">
+          <button class="month-button" type="button" id="prevMonthButton" aria-label="Mes anterior">‹</button>
+          <div class="month-title" id="monthTitle">Mes</div>
+          <button class="month-button" type="button" id="nextMonthButton" aria-label="Mes següent">›</button>
+        </div>
+
+        <div class="weekday-row" aria-hidden="true">
+          <div class="weekday">Dl</div>
+          <div class="weekday">Dt</div>
+          <div class="weekday">Dc</div>
+          <div class="weekday">Dj</div>
+          <div class="weekday">Dv</div>
+          <div class="weekday">Ds</div>
+          <div class="weekday">Dg</div>
+        </div>
+
+        <div class="month-grid" id="monthGrid"></div>
+      </section>
+    </section>
+  </main>
+
+  <button class="fab" type="button" id="addButton" aria-label="Afegir activitat" hidden>+</button>
+
+  <section class="modal" id="activityModal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Afegir activitat</h2>
+        <button class="close-button" type="button" id="closeModalButton" aria-label="Tancar">×</button>
+      </div>
+
+      <form class="form-grid" id="activityForm">
+        <label>
+          Activitat
+          <input id="activityName" type="text" placeholder="Ex. Dinar fora" required>
+        </label>
+
+        <label>
+          Data
+          <input id="activityDate" type="date" required>
+        </label>
+
+        <label>
+          Hora
+          <input id="activityTime" type="time" required>
+        </label>
+
+        <label>
+          Lloc
+          <input id="activityPlace" type="text" placeholder="Ex. Centre comercial" required>
+        </label>
+
+        <label class="full">
+          Persones
+          <input id="activityPeople" type="text" placeholder="Opcional">
+        </label>
+
+        <p class="hint full">Només es poden guardar activitats en dissabte o diumenge.</p>
+
+        <div class="full">
+          <button class="primary-button" type="submit">Guardar activitat</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <script>
+    const storageKey = "weekendPlannerEvents";
+    const monthNames = [
+      "gener", "febrer", "març", "abril", "maig", "juny",
+      "juliol", "agost", "setembre", "octubre", "novembre", "desembre"
+    ];
+
+    const tabs = document.querySelectorAll(".tab");
+    const pages = {
+      home: document.getElementById("homePage"),
+      calendar: document.getElementById("calendarPage")
+    };
+
+    const form = document.getElementById("activityForm");
+    const activityName = document.getElementById("activityName");
+    const activityDate = document.getElementById("activityDate");
+    const activityTime = document.getElementById("activityTime");
+    const activityPlace = document.getElementById("activityPlace");
+    const activityPeople = document.getElementById("activityPeople");
+
+    const nextTitle = document.getElementById("nextTitle");
+    const nextInfo = document.getElementById("nextInfo");
+    const totalEvents = document.getElementById("totalEvents");
+    const saturdayEvents = document.getElementById("saturdayEvents");
+    const sundayEvents = document.getElementById("sundayEvents");
+    const upcomingList = document.getElementById("upcomingList");
+    const monthGrid = document.getElementById("monthGrid");
+    const monthTitle = document.getElementById("monthTitle");
+    const prevMonthButton = document.getElementById("prevMonthButton");
+    const nextMonthButton = document.getElementById("nextMonthButton");
+    const addButton = document.getElementById("addButton");
+    const homeAddButton = document.getElementById("homeAddButton");
+    const openCalendarButton = document.getElementById("openCalendarButton");
+    const activityModal = document.getElementById("activityModal");
+    const closeModalButton = document.getElementById("closeModalButton");
+
+    const today = new Date();
+    let visibleMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    let events = normalizeEvents(loadEvents());
+    saveEvents();
+
+    function loadEvents() {
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        return JSON.parse(saved);
+      }
+
+      return [
+        {
+          id: crypto.randomUUID(),
+          name: "Passeig pel parc",
+          date: nextWeekendDate("Dissabte"),
+          time: "11:00",
+          place: "Parc central",
+          people: "Laura"
+        },
+        {
+          id: crypto.randomUUID(),
+          name: "Sopar tranquil",
+          date: nextWeekendDate("Diumenge"),
+          time: "20:30",
+          place: "Casa",
+          people: ""
+        }
+      ];
+    }
+
+    function normalizeEvents(eventList) {
+      return eventList.map((event) => {
+        const day = event.day === "Sabado" ? "Dissabte" : event.day === "Domingo" ? "Diumenge" : event.day;
+        const fallbackDate = day === "Diumenge" ? nextWeekendDate("Diumenge") : nextWeekendDate("Dissabte");
+
+        return {
+          id: event.id || crypto.randomUUID(),
+          name: event.name || "Activitat",
+          date: event.date || fallbackDate,
+          time: event.time || "10:00",
+          place: event.place || "Lloc pendent",
+          people: event.people || ""
+        };
+      });
+    }
+
+    function saveEvents() {
+      localStorage.setItem(storageKey, JSON.stringify(events));
+    }
+
+    function pad(value) {
+      return String(value).padStart(2, "0");
+    }
+
+    function toDateKey(date) {
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+    }
+
+    function parseDateKey(dateKey) {
+      const [year, month, day] = dateKey.split("-").map(Number);
+      return new Date(year, month - 1, day);
+    }
+
+    function nextWeekendDate(dayName) {
+      const targetDay = dayName === "Diumenge" ? 0 : 6;
+      const date = new Date();
+      const daysUntil = (targetDay - date.getDay() + 7) % 7;
+      date.setDate(date.getDate() + daysUntil);
+      return toDateKey(date);
+    }
+
+    function isWeekend(dateKey) {
+      const day = parseDateKey(dateKey).getDay();
+      return day === 0 || day === 6;
+    }
+
+    function dayName(dateKey) {
+      return parseDateKey(dateKey).getDay() === 6 ? "Dissabte" : "Diumenge";
+    }
+
+    function formatDate(dateKey) {
+      const date = parseDateKey(dateKey);
+      return `${date.getDate()} de ${monthNames[date.getMonth()]} de ${date.getFullYear()}`;
+    }
+
+    function formatEventLine(event) {
+      const people = event.people ? ` · amb ${event.people}` : "";
+      return `${dayName(event.date)} ${formatDate(event.date)} a les ${event.time} · ${event.place}${people}`;
+    }
+
+    function sortedEvents() {
+      return [...events].sort((a, b) => {
+        const dateCompare = a.date.localeCompare(b.date);
+        return dateCompare !== 0 ? dateCompare : a.time.localeCompare(b.time);
+      });
+    }
+
+    function futureEvents() {
+      const todayKey = toDateKey(new Date());
+      return sortedEvents().filter((event) => event.date >= todayKey);
+    }
+
+    function switchPage(pageName) {
+      tabs.forEach((tab) => {
+        tab.classList.toggle("active", tab.dataset.page === pageName);
+      });
+
+      Object.entries(pages).forEach(([name, page]) => {
+        page.classList.toggle("active", name === pageName);
+      });
+
+      addButton.hidden = pageName !== "calendar";
+    }
+
+    function openModal(dateKey) {
+      form.reset();
+      activityDate.value = dateKey || nextWeekendDate("Dissabte");
+      activityModal.classList.add("show");
+      activityModal.setAttribute("aria-hidden", "false");
+      setTimeout(() => activityName.focus(), 50);
+    }
+
+    function closeModal() {
+      activityModal.classList.remove("show");
+      activityModal.setAttribute("aria-hidden", "true");
+    }
+
+    function changeMonth(offset) {
+      visibleMonth = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + offset, 1);
+      renderCalendar();
+    }
+
+    function eventsForDate(dateKey) {
+      return sortedEvents().filter((event) => event.date === dateKey);
+    }
+
+    function renderNextEvent() {
+      const next = futureEvents()[0] || sortedEvents()[0];
+
+      if (!next) {
+        nextTitle.textContent = "Encara no tens esdeveniments";
+        nextInfo.textContent = "Afegeix una activitat al calendari per veure-la aquí.";
+        return;
+      }
+
+      nextTitle.textContent = next.name;
+      nextInfo.textContent = formatEventLine(next);
+    }
+
+    function renderSummary() {
+      const saturday = events.filter((event) => parseDateKey(event.date).getDay() === 6).length;
+      const sunday = events.filter((event) => parseDateKey(event.date).getDay() === 0).length;
+
+      totalEvents.textContent = events.length;
+      saturdayEvents.textContent = saturday;
+      sundayEvents.textContent = sunday;
+    }
+
+    function createEventCard(event) {
+      const card = document.createElement("article");
+      const people = event.people ? ` · amb ${event.people}` : "";
+      card.className = "event-card";
+
+      card.innerHTML = `
+        <div class="event-top">
+          <div class="event-title"></div>
+          <div class="event-date"></div>
+        </div>
+        <div class="event-detail"></div>
+        <button class="delete-button" type="button">Eliminar</button>
+      `;
+
+      card.querySelector(".event-title").textContent = event.name;
+      card.querySelector(".event-date").textContent = `${dayName(event.date)} · ${event.time}`;
+      card.querySelector(".event-detail").textContent = `${formatDate(event.date)} · ${event.place}${people}`;
+      card.querySelector(".delete-button").addEventListener("click", () => {
+        events = events.filter((item) => item.id !== event.id);
+        saveEvents();
+        render();
+      });
+
+      return card;
+    }
+
+    function renderUpcomingList() {
+      const list = futureEvents().slice(0, 4);
+      upcomingList.innerHTML = "";
+
+      if (list.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = "No tens cap activitat pròxima guardada.";
+        upcomingList.appendChild(empty);
+        return;
+      }
+
+      list.forEach((event) => upcomingList.appendChild(createEventCard(event)));
+    }
+
+    function renderCalendar() {
+      const year = visibleMonth.getFullYear();
+      const month = visibleMonth.getMonth();
+      const firstDay = new Date(year, month, 1);
+      const startOffset = (firstDay.getDay() + 6) % 7;
+      const gridStart = new Date(year, month, 1 - startOffset);
+      const todayKey = toDateKey(new Date());
+
+      monthTitle.textContent = `${monthNames[month]} ${year}`;
+      monthGrid.innerHTML = "";
+
+      for (let index = 0; index < 42; index += 1) {
+        const date = new Date(gridStart);
+        date.setDate(gridStart.getDate() + index);
+
+        const dateKey = toDateKey(date);
+        const weekend = date.getDay() === 0 || date.getDay() === 6;
+        const dayEvents = eventsForDate(dateKey);
+        const cell = document.createElement("article");
+        cell.className = [
+          "calendar-day",
+          date.getMonth() !== month ? "muted" : "",
+          weekend ? "weekend" : "",
+          dateKey === todayKey ? "today" : ""
+        ].filter(Boolean).join(" ");
+
+        const button = document.createElement("button");
+        button.className = "day-button";
+        button.type = "button";
+        button.disabled = !weekend;
+        button.innerHTML = `
+          <span class="day-number">${date.getDate()}</span>
+          <span class="day-kind">${weekend ? dayName(dateKey) : ""}</span>
+        `;
+
+        if (weekend) {
+          button.addEventListener("click", () => openModal(dateKey));
+        }
+
+        const eventList = document.createElement("div");
+        eventList.className = "day-events";
+
+        dayEvents.slice(0, 3).forEach((event) => {
+          const item = document.createElement("div");
+          item.className = "calendar-event";
+          item.innerHTML = `<span class="event-time"></span><span></span>`;
+          item.querySelector(".event-time").textContent = event.time;
+          item.querySelector("span:last-child").textContent = event.name;
+          eventList.appendChild(item);
+        });
+
+        if (dayEvents.length > 3) {
+          const more = document.createElement("div");
+          more.className = "calendar-event";
+          more.textContent = `+${dayEvents.length - 3} més`;
+          eventList.appendChild(more);
+        }
+
+        cell.appendChild(button);
+        cell.appendChild(eventList);
+        monthGrid.appendChild(cell);
+      }
+    }
+
+    function render() {
+      renderNextEvent();
+      renderSummary();
+      renderUpcomingList();
+      renderCalendar();
+    }
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => switchPage(tab.dataset.page));
+    });
+
+    prevMonthButton.addEventListener("click", () => changeMonth(-1));
+    nextMonthButton.addEventListener("click", () => changeMonth(1));
+    addButton.addEventListener("click", () => openModal());
+    homeAddButton.addEventListener("click", () => {
+      switchPage("calendar");
+      openModal();
+    });
+    openCalendarButton.addEventListener("click", () => switchPage("calendar"));
+    closeModalButton.addEventListener("click", closeModal);
+    activityModal.addEventListener("click", (event) => {
+      if (event.target === activityModal) {
+        closeModal();
+      }
+    });
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      if (!isWeekend(activityDate.value)) {
+        alert("Tria un dissabte o un diumenge.");
+        return;
+      }
+
+      events.push({
+        id: crypto.randomUUID(),
+        name: activityName.value.trim(),
+        date: activityDate.value,
+        time: activityTime.value,
+        place: activityPlace.value.trim(),
+        people: activityPeople.value.trim()
+      });
+
+      visibleMonth = new Date(parseDateKey(activityDate.value).getFullYear(), parseDateKey(activityDate.value).getMonth(), 1);
+      saveEvents();
+      closeModal();
+      render();
+      switchPage("calendar");
+    });
+
+    render();
+  </script>
+</body>
+</html>
